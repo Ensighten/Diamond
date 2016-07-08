@@ -22,10 +22,6 @@ fi
 #mimicing backports this is "-<identifier>"
 if [ -e localversion ]; then
     LOCAL_REV=$(cat localversion)
-    if [ -n "${LOCAL_REV}" ];
-    then
-        LOCAL_REV="-${LOCAL_REV}"
-    fi
 fi
 
 while getopts "mnr" opt; do
