@@ -130,7 +130,16 @@ class GraphiteHandler(Handler):
         try:
             self.socket.sendall(data)
             self._reset_errors()
-        except:
+            try:
+                self.socket.settimeout(0.300)
+                blah = self.socket.recv(4096)
+                self.socket.settimeout(self.timeout)
+                if not blah:
+                    self.log.error("Received empty response from ELB - backend relay broken, killing socket")
+                    raise Exception("ELB error")
+	    except socket.timeout as e:
+                pass
+        except Exception as e:
             self._close()
             self._throttle_error("GraphiteHandler: Socket error, "
                                  "trying reconnect.")
@@ -147,6 +156,7 @@ class GraphiteHandler(Handler):
                     self.last_connect_timestamp + self.reconnect_interval):
                 return True
         return False
+
 
     def _send(self):
         """
@@ -255,5 +265,6 @@ class GraphiteHandler(Handler):
         Close the socket
         """
         if self.socket is not None:
+            self.socket.shutdown(socket.SHUT_RDWR)
             self.socket.close()
         self.socket = None
