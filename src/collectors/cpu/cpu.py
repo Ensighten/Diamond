@@ -43,6 +43,7 @@ class CPUCollector(diamond.collector.Collector):
         config_help.update({
             'percore':  'Collect metrics per cpu core or just total',
             'simple':   'only return aggregate CPU% metric',
+            'extended':  'return aggregate CPU% metric but also complex CPU metrics',
             'normalize': 'for cpu totals, divide by the number of CPUs',
         })
         return config_help
@@ -57,6 +58,7 @@ class CPUCollector(diamond.collector.Collector):
             'percore':  'True',
             'xenfix':   None,
             'simple':   'False',
+            'extended':  'False',
             'normalize': 'False',
         })
         return config
@@ -96,7 +98,9 @@ class CPUCollector(diamond.collector.Collector):
                 dt = cpu_delta_time(self.INTERVAL)
                 cpuPct = 100 - (dt[len(dt) - 1] * 100.00 / sum(dt))
                 self.publish('percent', str('%.4f' % cpuPct))
-                return True
+                # the 'extended' flag tells us to return simple AND complex CPU metrics
+                if not str_to_bool(self.config['extended']):
+                    return True
 
             results = {}
             # Open file
